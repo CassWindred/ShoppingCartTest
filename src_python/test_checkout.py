@@ -1,3 +1,9 @@
+# Task Comment: For a more complex project one should seperate fixtures into conftest.py
+# .. But for a short test file like this, it's better to keep the file whole
+# .. As pytest uses the same name for fixtures as names and parameters
+# .. Pylint must be told to be quiet about this or it will whine every time a fixture is used
+# pylint: disable=redefined-outer-name
+
 import pytest
 from Checkout import *
 
@@ -10,10 +16,10 @@ def product():
 @pytest.fixture
 def basket():
     return [
-        BasketItem(Product("A"), 3),
-        BasketItem(Product("B"), 3),
-        BasketItem(Product("C"), 1),
-        BasketItem(Product("D"), 2),
+        BasketItem("A", 3),
+        BasketItem("A", 3),
+        BasketItem("C", 1),
+        BasketItem("D", 2),
     ]
 
 
@@ -47,7 +53,7 @@ def pricing_info():
 
 @pytest.fixture
 def input_as_json():
-    return '[{"code":"A","quantity":3},{"code":"B","quantity":3},{"code":"C","quantity":1},{"code":"D","quantity":2}'
+    return '[{"code":"A","quantity":3},{"code":"B","quantity":3},{"code":"C","quantity":1},{"code":"D","quantity":2}]'
 
 
 @pytest.fixture
@@ -73,5 +79,40 @@ def test_combo_price_modifier_calculation(combo_price_modifier: ComboDealPriceMo
     assert combo_price_modifier.modified_price(unit_price, 4) == 190
 
 
-def test_pricing_info(pricing_info, input_as_json, input_as_object):
-    pass
+def test_pricing_info_json_parsing(pricing_info: PricingInfo, input_as_json: str):
+    assert pricing_info.calculate_total_cost(input_as_json) == 284
+
+
+@pytest.mark.parametrize(
+    "expected_cost,a_combo_price_mod,a_unit_price_mod,a_quantity_mod,d_unit_price_mod",
+    [
+        (284, 0, 0, 0, 0),
+        (294, 10, 0, 0, 0),
+        (280, 0, 0, 0, -2),
+        pytest.param(200, 0, 0, 0, 0, marks=pytest.mark.xfail),  # expect failure
+    ],
+)
+def test_pricing_info_calculation(
+    pricing_info: PricingInfo,
+    input_as_object: List[dict],
+    expected_cost,
+    a_combo_price_mod,
+    a_unit_price_mod,
+    a_quantity_mod,
+    d_unit_price_mod,
+):
+    pricings_a: ProductPricing = pricing_info.product_pricings["A"]
+    pricings_a.unit_price += a_unit_price_mod
+    pricings_d: ProductPricing = pricing_info.product_pricings["D"]
+    pricings_d.unit_price += d_unit_price_mod
+
+    a_basket_item = next((item for item in input_as_object if item["code"] == "A"))
+    a_basket_item["quantity"] += a_quantity_mod
+
+    modifier_a = pricings_a.price_modifier
+    if isinstance(modifier_a, ComboDealPriceModifier):
+        modifier_a.combo_price = modifier_a.combo_price + a_combo_price_mod
+
+        assert pricing_info.calculate_total_cost(input_as_object) == expected_cost
+    else:
+        pytest.fail("A_modifier should be ComboDealPriceModifier")
