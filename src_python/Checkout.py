@@ -4,22 +4,26 @@ import json
 from typing import List, NamedTuple, Optional
 
 # Task Comment: Having an entire class for just the product name is overkill in this context.
-# .. But is built as a class so as to make it easier to extend, as it would likely need to be in a production context.
-# .. Other information this could encapsulate in production could be weight, a description, and so on.
-# .. The price is not encapsulated in this class as it is not inherent to the product and can change between PriceInfo datasets.
+# .. But is built as a class so as to make it easier to extend, as it would likely need to be in a
+# .. production context.
+# .. Other information this could encapsulate in production could be weight, a description,
+# .. and so on.
+# .. The price is not encapsulated in this class as it is not inherent to the product and can
+# .. change between PriceInfo datasets.
 
 
 class Product:
-
     name: str
 
     @property
     def id(self):
-        #  Task Comment: This is fine for this dataset, but would likely need to be changed if product names can overlap
+        # Task Comment: This is fine for this dataset, but would likely need to be changed
+        # .. if product names can overlap
         return self.name
 
     def __init__(self, name) -> None:
         assert isinstance(name, str)
+
         self.name = name
 
 
@@ -50,12 +54,12 @@ class ComboDealPriceModifier(AbstractPriceModifier):
 
         super().__init__()
 
-    def modified_price(self, unitprice: float, quantity: int) -> float:
-        float(unitprice)
+    def modified_price(self, unit_price: float, quantity: int) -> float:
+        float(unit_price)
         assert isinstance(quantity, int) and quantity >= 0
 
         deal_price = (quantity // self.per_amount) * self.combo_price
-        remaining_price = (quantity % self.per_amount) * unitprice
+        remaining_price = (quantity % self.per_amount) * unit_price
         return deal_price + remaining_price
 
 
@@ -74,7 +78,6 @@ class ProductPricing:
 
 
 class PricingInfo:
-
     product_pricings: dict[str, ProductPricing]  # Product IDs to Pricing
 
     def __init__(
@@ -86,11 +89,11 @@ class PricingInfo:
 
         if isinstance(product_pricings, dict):
             assert all(
-                isinstance(key, str) for key in product_pricings.keys
+                isinstance(key, str) for key in product_pricings
             ), "Pricing Keys must all be Product id's (str)"
 
             assert all(
-                isinstance(val, ProductPricing) for val in product_pricings.values
+                isinstance(val, ProductPricing) for val in product_pricings.values()
             ), "Pricing Values must all be ProductPricing's"
 
             self.product_pricings = product_pricings
@@ -107,22 +110,23 @@ class PricingInfo:
 
     def calculate_item_cost(self, item: BasketItem) -> float:
         try:
-            pricing = self.product_pricings[item.product.id]
-        except KeyError as e:
+            pricing = self.product_pricings[item.code]
+        except KeyError as ex:
             raise ValueError(
-                f"Product {item.product.id} in basket does not have pricing data in PricingInfo"
-            )
+                f"Product {item.code} in basket does not have pricing data in"
+                " PricingInfo"
+            ) from ex
 
         if pricing.price_modifier is not None:
             item_price = pricing.price_modifier.modified_price(
-                pricing.unit_price, item.count
+                pricing.unit_price, item.quantity
             )
         else:
-            item_price = item.count * pricing.unit_price
+            item_price = item.quantity * pricing.unit_price
 
         return item_price
 
-    def dict_to_basket_item(item: dict):
+    def dict_to_basket_item(self, item: dict):
         assert (
             "code" in item and "quantity" in item
         ), "Invalid Basket Format, items must include 'code' and 'quantity"
@@ -137,21 +141,23 @@ class PricingInfo:
     def calculate_total_cost(
         self, basket: List[BasketItem] | List[dict] | str
     ) -> float:
+        print("CalculateTOtal")
         if isinstance(basket, str):
             try:
                 basket = json.loads(basket)
-            except json.JSONDecodeError as e:
+            except json.JSONDecodeError as ex:
                 print("Invalid Basket JSON")
-                raise e
+                raise ex
 
         if isinstance(basket, List):
             if all(isinstance(item, BasketItem) for item in basket):
                 pass
             elif all(isinstance(item, dict) for item in basket):
-                basket = [self.dict_to_basket_item(item) for item in basket]
+                basket = [self.dict_to_basket_item(item) for item in basket]  # type: ignore
             else:
                 raise ValueError(
-                    "Invalid Basket Format, all elements of basket must be either a dict or a BasketItem"
+                    "Invalid Basket Format, all elements of basket must be either a"
+                    " dict or a BasketItem"
                 )
         else:
             raise ValueError("Invalid Basket Format, basket must be a list")
@@ -159,6 +165,6 @@ class PricingInfo:
         total_cost = 0
 
         for item in basket:
-            total_cost += self.calculate_item_cost(item)
+            total_cost += self.calculate_item_cost(item)  # type: ignore
 
         return total_cost
