@@ -44,3 +44,5 @@ shoppingcarttest.code-workspace
 Checkout_Python/__pycache__/
 
 Checkout_Python/.vscode/
+
+PyCheckout/__pycache__/
