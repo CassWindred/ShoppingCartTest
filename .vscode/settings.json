@@ -1,0 +1,13 @@
+{
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "python.linting.pylintArgs": [
+        "--init-hook",
+        "import sys; sys.path.append('<path to folder your module is in>')"
+    ],
+    "python.linting.enabled": true
+}

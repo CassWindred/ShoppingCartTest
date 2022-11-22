@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import json
-from typing import Dict, List, NamedTuple, Optional, Union
+from typing import Dict, List, Optional, Union
 
 # Task Comment: Having an entire class for just the product name is overkill in this context.
 # .. But is built as a class so as to make it easier to extend, as it would likely need to be in a

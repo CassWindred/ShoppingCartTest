@@ -5,7 +5,7 @@
 # pylint: disable=redefined-outer-name
 
 import pytest
-from .Checkout import *
+from .checkout import *
 
 
 @pytest.fixture

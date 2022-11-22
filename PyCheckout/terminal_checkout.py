@@ -12,14 +12,12 @@ copy paste JSON as a data source.
 If provided with the command argument `--i` or `--input` followed by a filename,
 then `TerminalCheckout will instead use the JSON found in the given filename.
 """
-# The implementation given in Checkout.py is intended to be flexible, reusable and extendable for different pricing sets and such.
-# This file produces a setup as defined in the Task document, and provides a command-line interface for it.
 
 import json
 import sys
 from typing import List
 
-from .Checkout import (
+from .checkout import (
     Product,
     PricingInfo,
     ProductPricing,

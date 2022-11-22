@@ -3,10 +3,10 @@
 To use this program from the terminal, first install it using
 
 ```shell
-python -m pip install -r requirements.txt
+python -m pip install -r Pycheckout/requirements.txt
 ```
 
-from the root directory, then run the terminal application using
+from the root directory (above PyCheckout), then run the terminal application using
 
 ```shell
 python TerminalCheckout.py

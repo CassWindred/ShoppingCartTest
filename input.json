@@ -1,18 +1,18 @@
 [
     {
         "code": "A",
-        "quantity": "hello"
-    },
-    {
-        "code": "B",
-        "quantity": 3
-    },
-    {
-        "code": "C",
         "quantity": 1
     },
     {
+        "code": "B",
+        "quantity": 0
+    },
+    {
+        "code": "C",
+        "quantity": 0
+    },
+    {
         "code": "D",
-        "quantity": 2
+        "quantity": 0
     }
 ]
