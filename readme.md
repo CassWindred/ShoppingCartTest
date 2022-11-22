@@ -1,0 +1,1 @@
+Please open `./PyCheckout/docs/index.html` for documentation.
