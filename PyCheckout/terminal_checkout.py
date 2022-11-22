@@ -1,10 +1,11 @@
 """A basic terminal interface for the Checkout classes provided by `Checkout_Python.Checkout`
 
 
-The implementation given in `Checkout.py` is intended to be 
+The implementation given in `Checkout.py` is intended to be
 flexible, reusable and extendable for different pricing sets and such.
 
-This file produces a setup as defined in the Task document, and provides a command-line interface for it.
+This file produces a setup as defined in the Task document, and provides a command-line interface 
+for it.
 
 If invoked without arguments, `TerminalCheckout` will use Interactive mode, allowing you to
 copy paste JSON as a data source.
@@ -24,6 +25,10 @@ from .checkout import (
     ComboDealPriceModifier,
 )
 
+#  text formatting constants
+ITALIC_START = "\x1B[3m"
+ITALIC_END = "\x1B[0m"
+
 pricing_info = PricingInfo(
     [
         ProductPricing(
@@ -39,7 +44,8 @@ pricing_info = PricingInfo(
 
 
 def cause_stack(exception: BaseException) -> List[BaseException]:
-    """A utility function returning an ordered list of Exceptions that caused the previous exception.
+    """A utility function returning an ordered list of Exceptions that caused the previous
+    exception.
 
     Args:
         exception (BaseException): The first exception to find the cause of.
@@ -54,7 +60,8 @@ def cause_stack(exception: BaseException) -> List[BaseException]:
 
 
 def format_causes(exception: BaseException) -> str:
-    r"""A utility function returning a string formatted description of the exceptions that caused the given exception.
+    r"""A utility function returning a string formatted description of the exceptions that
+    caused the given exception.
 
     Args:
         exception (BaseException): The first exception to find the cause of.
@@ -95,8 +102,6 @@ Invalid Input:
 def interactive_mode():
     """Enters interactive mode, allowing the user to input JSON strings directly into the terminal.
     """
-    ITALIC_START = "\x1B[3m"
-    ITALIC_END = "\x1B[0m"
 
     print(
         f"""Welcome to Terminal Checkout, the checkout application of the future!

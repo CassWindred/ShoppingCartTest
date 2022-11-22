@@ -77,7 +77,10 @@ def input_as_json() -> str:
     Returns:
         str: A basic basket in JSON
     """
-    return '[{"code":"A","quantity":3},{"code":"B","quantity":3},{"code":"C","quantity":1},{"code":"D","quantity":2}]'
+    return (
+        '[{"code":"A","quantity":3},{"code":"B","quantity":3},'
+        '{"code":"C","quantity":1},{"code":"D","quantity":2}]'
+    )
 
 
 @pytest.fixture
@@ -169,7 +172,7 @@ def test_pricing_info_calculation(
         pytest.fail("A_modifier should be ComboDealPriceModifier")
 
 
-def test_pricing_info_bad_input(pricing_info: PricingInfo, input_as_object: List[dict]):
+def test_pricing_info_bad_input(pricing_info: PricingInfo):
     """Checks that PricingInfo raises errors on bad input"""
     with pytest.raises(ValueError):
         pricing_info.calculate_total_cost("not json")

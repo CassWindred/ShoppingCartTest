@@ -29,10 +29,12 @@ class Product:
         self.name = name
 
 
-# Task Comment: Similarly, having a whole abstract class interface for Price Modifiers is overkill when the only deal type is "{amount} for {price}""
-# .. But using a common interface in future allows for easy drop in alternative deal types such as "{percent}% Off"
-# .. If there was more than one Price Modifier type, it would likely be better to move them into a seperate file
-# .. However in this case the two classes are small enough to not be worth the minor complexity introduced thusly
+# Task Comment: Similarly, having a whole abstract class interface for Price Modifiers is overkill
+# .. when the only deal type is "{amount} for {price}", but using a common interface in future
+# .. allows for easy drop in alternative deal types such as {percent}% Off"
+# .. If there was more than one Price Modifier type, it would likely be better to move them into a
+# .. seperate file, however in this case the two classes are small enough to not be worth the minor
+# .. complexity introduced thusly
 
 
 class AbstractPriceModifier(ABC):
@@ -49,7 +51,6 @@ class AbstractPriceModifier(ABC):
         Returns:
             float: The modified price
         """
-        pass
 
 
 class ComboDealPriceModifier(AbstractPriceModifier):
