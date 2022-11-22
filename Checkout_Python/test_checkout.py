@@ -5,16 +5,26 @@
 # pylint: disable=redefined-outer-name
 
 import pytest
-from Checkout import *
+from .Checkout import *
 
 
 @pytest.fixture
-def product():
+def product() -> Product:
+    """Pytest fixture providing a basic Product instance with name "X"
+
+    Returns:
+        Product: A basic product instance with name "X"
+    """
     return Product(name="X")
 
 
 @pytest.fixture
-def basket():
+def basket() -> List[BasketItem]:
+    """Pytest fixture providing a basic basket list
+
+    Returns:
+        List[BasketItem]: A list of BasketItems
+    """
     return [
         BasketItem("A", 3),
         BasketItem("A", 3),
@@ -24,14 +34,23 @@ def basket():
 
 
 @pytest.fixture
-def combo_price_modifier():
+def combo_price_modifier() -> ComboDealPriceModifier:
+    """Pytest fixture providing a basic ComboDealPriceModifier
+
+    Returns:
+        ComboDealPriceModifier: A 3 for 140 ComboDealPriceModifier
+    """
     # 3 for 140
     return ComboDealPriceModifier(combo_price=140, per_amount=3)
 
 
 @pytest.fixture
-def pricing_info():
-    # pricing info as defined in task
+def pricing_info() -> PricingInfo:
+    """Pytest fixture providing a basic PricingInfo
+
+    Returns:
+        PricingInfo: PricingInfo initialised to values given for task
+    """
     pricing_info = PricingInfo(
         [
             ProductPricing(
@@ -52,12 +71,22 @@ def pricing_info():
 
 
 @pytest.fixture
-def input_as_json():
+def input_as_json() -> str:
+    """Pytest fixture providing a basic JSON input
+
+    Returns:
+        str: A basic basket in JSON
+    """
     return '[{"code":"A","quantity":3},{"code":"B","quantity":3},{"code":"C","quantity":1},{"code":"D","quantity":2}]'
 
 
 @pytest.fixture
-def input_as_object():
+def input_as_object() -> List:
+    """Pytest fixture providing a basic input
+
+    Returns:
+        str: A basic basket
+    """
     return [
         {"code": "A", "quantity": 3},
         {"code": "B", "quantity": 3},
@@ -66,12 +95,13 @@ def input_as_object():
     ]
 
 
-def test_product_id_is_name(product):
-    assert type(product) is Product
+def test_product_id_is_name(product: Product):
+    """Checks the product id is the product name."""
     assert product.id == product.name
 
 
 def test_combo_price_modifier_calculation(combo_price_modifier: ComboDealPriceModifier):
+    """Checks the ComboPriceModifier performs the calculations correctly"""
     unit_price = 50
 
     assert combo_price_modifier.modified_price(unit_price, 1) == unit_price
@@ -79,7 +109,27 @@ def test_combo_price_modifier_calculation(combo_price_modifier: ComboDealPriceMo
     assert combo_price_modifier.modified_price(unit_price, 4) == 190
 
 
+def test_combo_price_modifier_bad_input(combo_price_modifier: ComboDealPriceModifier):
+    """Checks the ComboPriceModifier raises errors on bad input"""
+    with pytest.raises(ValueError):
+        combo_price_modifier.modified_price("by all known laws of aviation", 1)
+    with pytest.raises(ValueError):
+        combo_price_modifier.modified_price(5, "the bee should not be able to fly")
+    with pytest.raises(ValueError):
+        combo_price_modifier.modified_price(5, 5.5)
+
+    with pytest.raises(ValueError):
+        ComboDealPriceModifier("the bee, of course", 5)
+    with pytest.raises(ValueError):
+        ComboDealPriceModifier(5, "flies anyway")
+    with pytest.raises(ValueError):
+        ComboDealPriceModifier(5, -5)
+    with pytest.raises(ValueError):
+        ComboDealPriceModifier(5, 5.5)
+
+
 def test_pricing_info_json_parsing(pricing_info: PricingInfo, input_as_json: str):
+    """Checks that PricingInfo can parse a correct JSON input"""
     assert pricing_info.calculate_total_cost(input_as_json) == 284
 
 
@@ -101,6 +151,7 @@ def test_pricing_info_calculation(
     a_quantity_mod,
     d_unit_price_mod,
 ):
+    """Checks that PricingInfo performs the calculations correctly"""
     pricings_a: ProductPricing = pricing_info.product_pricings["A"]
     pricings_a.unit_price += a_unit_price_mod
     pricings_d: ProductPricing = pricing_info.product_pricings["D"]
@@ -116,3 +167,28 @@ def test_pricing_info_calculation(
         assert pricing_info.calculate_total_cost(input_as_object) == expected_cost
     else:
         pytest.fail("A_modifier should be ComboDealPriceModifier")
+
+
+def test_pricing_info_bad_input(pricing_info: PricingInfo, input_as_object: List[dict]):
+    """Checks that PricingInfo raises errors on bad input"""
+    with pytest.raises(ValueError):
+        pricing_info.calculate_total_cost("not json")
+    with pytest.raises(ValueError):
+        pricing_info.calculate_total_cost(  # not a list of basket items
+            [
+                5,
+            ]
+        )
+
+    with pytest.raises(ValueError):  # Non existent product
+        pricing_info.calculate_total_cost([{"code": "E", "quantity": 1}])
+
+    for bad_input in [
+        [{"code": "A"}],  # no quantity
+        [{"quantity": 5}],  # no code
+        [{"code": 5, "quantity": 5}],  # nonstring code
+        [{"code": "A", "quantity": 5.5}],
+        [{"code": "A", "quantity": -1}],
+    ]:
+        with pytest.raises(ValueError):
+            pricing_info.calculate_total_cost(bad_input)
